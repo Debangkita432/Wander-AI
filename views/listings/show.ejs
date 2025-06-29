@@ -1,0 +1,101 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+      <!-- Listing Card -->
+      <div class="card mb-4 shadow-sm">
+        <img
+          src="<%= listing.image?.url || 'https://images.unsplash.com/photo-1625505826533-5c80aca7d157?auto=format&fit=crop&w=800&q=60' %>"
+          class="card-img-top"
+          alt="listing_image"
+          style="height: 20rem; object-fit: cover;"
+        />
+        <div class="card-body">
+          <h3 class="card-title"><%= listing.title %></h3>
+          <p class="card-text">
+            <%= listing.description || 'No description provided.' %><br>
+            <% if (listing.price != null) { %>
+              <strong>₹<%= listing.price.toLocaleString("en-IN") %></strong><br>
+            <% } else { %>
+              <span>Price not available</span><br>
+            <% } %>
+            <%= listing.location || 'No location specified.' %> | 
+            <%= listing.country || 'No country specified.' %>
+          </p>
+
+          <div class="d-flex gap-2">
+            <a href="/listings/<%= listing._id %>/edit" class="btn btn-danger">Edit</a>
+            <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE">
+              <button type="submit" class="btn btn-dark">Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Form -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">Leave a Review</h5>
+          <form method="POST" action="/listings/<%= listing._id %>/reviews" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="rating" class="form-label">Rating</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                id="rating"
+                name="review[rating]"
+                class="form-range"
+                required
+              />
+            </div>
+
+            <div class="mb-3">
+              <label for="comment" class="form-label">Comments</label>
+              <textarea
+                name="review[comment]"
+                id="comment"
+                class="form-control"
+                rows="4"
+                required
+              ></textarea>
+              <div class="invalid-feedback">Please add a comment</div>
+            </div>
+
+            <button class="btn btn-success">Submit</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- All Reviews -->
+      <h4 class="mb-3">All Reviews</h4>
+      <% if (listing.reviews.length === 0) { %>
+        <div class="alert alert-info">No reviews yet.</div>
+      <% } else { %>
+        <div class="row g-3">
+          <% listing.reviews.forEach(review => { %>
+            <div class="col-md-6">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <strong>Rating:</strong> <%= review.rating %> / 5 <br>
+                  <strong>Comment:</strong> <%= review.comment %> <br>
+                  <small class="text-muted"><%= new Date(review.createdAt).toLocaleString() %></small>
+                  <form
+                    method="POST"
+                    action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE"
+                    class="mt-2"
+                  >
+                    <button class="btn btn-sm btn-dark">Delete</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+</div>
