@@ -7,6 +7,8 @@ const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/expressError.js");
 const listings= require("./routes/listing.js");
 const reviews= require("./routes/review.js");
+const session=require("express-session");
+const flash=require("connect-flash");
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
 
@@ -32,14 +34,35 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "/public")));
 
-
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",reviews);
+const sessionOptions={
+secret:"mysupersecretcode",
+resave:false,
+saveuninitialized:true,
+cookie:{
+expires:Date.now + 7*24*60*60*100,
+maxAge:7*24*60*60*100,
+}
+};
 
 // Root route
 app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
+
+
+app.use(session(sessionOptions));
+app.use(flash());
+
+app.use((req,res,next)=>{
+res.locals.success=req.flash("success");
+res.locals.error=req.flash("error");
+next();
+});
+
+app.use("/listings",listings);
+app.use("/listings/:id/reviews",reviews);
+
+
 
 // 404 handler
 app.all("*", (req, res, next) => {
